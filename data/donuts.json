@@ -1,0 +1,7 @@
+{
+    "Caramel": {"price": 6, "stock": 50},
+    "Chocolate": {"price": 5, "stock": 40},
+    "Oreo": {"price": 7, "stock": 30},
+    "Biscoff": {"price": 7, "stock": 30},
+    "Strawberry":{"price": 5, "stock": 40}
+}
