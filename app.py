@@ -54,6 +54,20 @@ def add_to_cart():
     flash(f"{quantity} {donut}(s) added to cart.")
     return redirect(url_for('index'))
 
+# Remove an item from the shopping cart
+@app.route('/remove_from_cart/<item>')
+def remove_from_cart(item):
+    cart = session.get('cart', {})
+
+    if item in cart:
+        del cart [item]
+        session ['cart'] = cart
+        session.modified = True
+        flash(f"Removed all {item} from the cart.")
+    else:
+        flash("Item not found in cart")
+        
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
