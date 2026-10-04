@@ -36,16 +36,15 @@
             <li>{{ item }}: {{ '%.2f' % details ['quantity'] }} x
                                         ${{ details['price'] }}
                 = ${{ details ['quantity'] * details ['price'] }}
+                <a href="{{ url_for('remove_from_cart', item=item) }}">[Remove]</a>
             </li>
         {% endfor %}
     </ul>
+
+    <h4>Total: ${{ '%.2f' % total }}</h4>
+
 {% else %}
     <p>Your cart is empty</p>
 {% endif %}
-
-<li>{{ item }}: {{ '%.2f' % details ['quantity'] }} x ${{ details ['price'] }}
-    = ${{ details ['quantity'] * details ['price'] }}
-    <a href="{{ url_for('remove_from_cart', item=item) }}">[Remove]</a>
-</li>
 </body>
 </html>
