@@ -1,8 +1,12 @@
 {
     "Orignal Glazed": {"price": 3, "stock": 45},
+    "Vanilla Sugar": {"price": 3, "stock": 40},
     "Chocolate": {"price": 4, "stock": 40},
     "Strawberry":{"price": 4, "stock": 40},
+    "Blueberry": {"price": 4, "stock": 35},
+    "Mango": {"price": 4, "stock": 30},
     "Caramel": {"price": 5, "stock": 50},
+    "Pistachio": {"price": 5, "stock": 30},
     "Cinnamon Apple": {"price": 5, "stock": 40},
     "Oreo": {"price": 6, "stock": 30},
     "Biscoff": {"price": 6, "stock": 30},
