@@ -6,20 +6,46 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Successfully Displayed</h1>
+<form action="{{ url_for('add_to_cart')}}" method="post">
+    <fieldset>
+        <legend for="donut">Select Donuts</legend>
+        <select name="donut" id="donut">
+            {% for donut, details in donuts.items() %}
+            <option value="{{ donut }}">{{ donut }} ${{ details ['price'] }}</option>
+            {% endfor %}
+        </select>
+        <label for="quantity">Quantity</label>
+        <input type="number" name="quantity" value="1" min="1">
+        <button type="submit">Add to cart</button>
+    </fieldset>
+</form>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class="flashes">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
 
+<h2>Your Cart</h2>
+{% if cart %}
     <ul>
-        {%for donut, details in donuts.items() %}
-        <li>{{ donut }} - ${{ details ['price'] }} (Stock: {{ details ['stock'] }})</li>
-        {% endfor %}
-    </ul>   
-
-    <h2>Add-ons available</h2>
-    
-    <ul>
-        {% for addon, details in addons.items() %}
-        <li>{{ addon }} (${{ details['price'] }})</li>
+        {% for item, details in cart.items()%}
+            <li>{{ item }}: {{ '%.2f' % details ['quantity'] }} x
+                                        ${{ details['price'] }}
+                = ${{ details ['quantity'] * details ['price'] }}
+            </li>
         {% endfor %}
     </ul>
+{% else %}
+    <p>Your cart is empty</p>
+{% endif %}
+
+<li>{{ item }}: {{ '%.2f' % details ['quantity'] }} x ${{ details ['price'] }}
+    = ${{ details ['quantity'] * details ['price'] }}
+    <a href="{{ url_for('remove_from_cart', item=item) }}">[Remove]</a>
+</li>
 </body>
 </html>
