@@ -1,7 +1,10 @@
 {
-    "Caramel": {"price": 6, "stock": 50},
-    "Chocolate": {"price": 5, "stock": 40},
-    "Oreo": {"price": 7, "stock": 30},
-    "Biscoff": {"price": 7, "stock": 30},
-    "Strawberry":{"price": 5, "stock": 40}
+    "Orignal Glazed": {"price": 3, "stock": 45},
+    "Chocolate": {"price": 4, "stock": 40},
+    "Strawberry":{"price": 4, "stock": 40},
+    "Caramel": {"price": 5, "stock": 50},
+    "Cinnamon Apple": {"price": 5, "stock": 40},
+    "Oreo": {"price": 6, "stock": 30},
+    "Biscoff": {"price": 6, "stock": 30},
+    "Nutella": {"price": 6, "stock": 35}
 }
