@@ -4,10 +4,17 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+# Calculate total cost based on cart contents and selected addons
+def calculate_total(cart):
+    total = sum(item['price'] * item['quantity'] for item in cart.values())
+    return total
+
 @app.route('/') 
 def index():
     donuts, addons = load_data()
-    return render_template('index.html', donuts=donuts, addons=addons)
+    cart = session.get('cart', {})
+    total = calculate_total(cart)
+    return render_template('index.html', donuts=donuts, addons=addons, cart=cart, total=total)
 
 @app.route('/about')
 def about():
@@ -16,7 +23,6 @@ def about():
 @app.route('/checkout')
 def checkout():
     return render_template('invoice.html')
-
 @app.route('/orders')
 def order_history():
     return render_template('order_history.html')
