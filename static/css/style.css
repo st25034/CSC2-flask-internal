@@ -116,3 +116,43 @@ footer {
     background-color: #CC9F69;
 }
 
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    header {
+        text-align: center;
+    }
+
+    nav {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    nav a {
+        display: block;
+        text-align: center;
+    }
+
+    main {
+        width: 100%;
+    }
+
+    fieldset {
+        width: auto;
+    }
+
+    select,
+    input,
+    button {
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+
+    ul {
+        padding-left: 20px;
+    }
+}
