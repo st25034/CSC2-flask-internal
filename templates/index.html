@@ -61,9 +61,13 @@
         {% endfor %}
     </ul>
 
+    <h4>Donuts subtotal: ${{ '%.2f' % donut_subtotal }}</h4>
+
 {% else %}
     <p>Your cart is empty</p>
 {% endif %}
+
+
 
 <h3>Selected Add-ons</h3>
     <ul>
@@ -71,6 +75,7 @@
             <li>{{ addon }}</li>
         {% endfor %}
     </ul>
+<h4>Add-ons subtotal: ${{ '%.2f' % addon_subtotal }}</h4>
 
 <h4>Total: ${{ '%.2f' % total }}</h4>
 
