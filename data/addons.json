@@ -1,5 +1,7 @@
 {
     "Sprinkles": {"price": 1},
+    "Mini Marshmallows": {"price": 1},
+    "Chopped Pecans": {"price": 1},
     "Chocolate Drizzle": {"price": 2},
     "Gift Box": {"price": 5},
     "Delivery": {"price": 10}
