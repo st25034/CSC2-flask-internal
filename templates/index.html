@@ -25,6 +25,20 @@
         <button type="submit">Add to cart</button>
     </fieldset>
 </form>
+
+<!-- Add-ons form -->
+<form action="{{ url_for('select_addon') }}" method="post">
+    <fieldset>
+        <legend>Add-ons</legend>
+        {% for addon, data in addons.items() %}
+            <label>
+                <input type="checkbox" name="addons" value="{{ addon }}">
+                {{ addon }} (${{ data.price }})
+            </label><br>
+        {% endfor %}
+        <button type="submit">Add to Cart</button>
+    </fieldset>
+</form>
 {% with messages = get_flashed_messages() %}
     {% if messages %}
         <ul class="flashes">
@@ -47,11 +61,19 @@
         {% endfor %}
     </ul>
 
-    <h4>Total: ${{ '%.2f' % total }}</h4>
-
 {% else %}
     <p>Your cart is empty</p>
 {% endif %}
+
+<h3>Selected Add-ons</h3>
+    <ul>
+        {% for addon in selected_addons %}
+            <li>{{ addon }}</li>
+        {% endfor %}
+    </ul>
+
+<h4>Total: ${{ '%.2f' % total }}</h4>
+
 </body>
 </html>
 {% endblock %}
