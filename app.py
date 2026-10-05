@@ -5,17 +5,25 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Calculate total cost based on cart contents and selected addons
-def calculate_total(cart):
-    total = sum(item['price'] * item['quantity'] for item in cart.values())
-    return total
+def calculate_total(cart, selected_addons):
+    donut_subtotal = sum(item['price'] * item['quantity'] for item in cart.values())
+    addon_subtotal = sum(selected_addons.values())
+
+    total = donut_subtotal + addon_subtotal
+
+    return total, donut_subtotal, addon_subtotal
 
 @app.route('/') 
 def index():
     donuts, addons = load_data()
     cart = session.get('cart', {})
-    selected_addons = session.get('selected_addons', [])
-    total = calculate_total(cart)
-    return render_template('index.html', donuts=donuts, addons=addons, cart=cart, selected_addons=selected_addons, total=total)
+    selected_addons = session.get('selected_addons', {})
+    total, donut_subtotal, addon_subtotal = calculate_total(cart, selected_addons)
+
+    if total > 50:
+        flash("You are ordering a lot! Consider calling us for a special deal.")
+
+    return render_template('index.html', donuts=donuts, addons=addons, cart=cart, selected_addons=selected_addons, donut_subtotal=donut_subtotal, addon_subtotal=addon_subtotal, total=total)
 
 @app.route('/about')
 def about():
@@ -96,7 +104,7 @@ def select_addon():
     session['selected_addons'] = selected_addons
     session.modified = True
 
-    flash("Add-ons added to cart.")
+    flash(f"{len(selected_addons)} add-on(s) added to cart.")
 
     return redirect(url_for('index'))
 
