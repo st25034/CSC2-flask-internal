@@ -1,0 +1,118 @@
+body {
+    font-family: Consolas, monospace;
+    margin: 0;
+    background-color: #FFE6A7;
+    color: #432818;
+}
+
+header {
+    background-color: #432818;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 10px 0 15px 0;
+    font-size: 32px;
+}
+
+/* Navigation */
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+}
+
+nav a:hover {
+    text-decoration: underline;
+    color: white;
+}
+
+/* Main content */
+main {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+h2, h3 {
+    color: #99582A;
+}
+
+/* Lists */
+ul {
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 8px;
+}
+
+/* Buttons */
+button {
+    background-color: #99582A;
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #6E4021;
+}
+
+/* Cart */
+h2 {
+    margin-top: 30px;
+}
+
+a {
+    color: #6F1D1B;
+}
+
+a:hover {
+    color: #9A4543;
+}
+
+/* Forms */
+fieldset {
+    border: 2px solid #59231A;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #FFF6DE;
+}
+
+legend {
+    font-weight: bold;
+    color: #6F1D1B;
+}
+
+select,
+input {
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid #e0c6cc;
+    border-radius: 5px;
+}
+
+
+/* Flash messages */
+.flashes {
+    list-style-type: none;
+    padding: 10px;
+    background-color: #FFF8E3;
+    border: 1px solid #99582A;
+    border-radius: 8px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    background-color: #CC9F69;
+}
+
