@@ -13,16 +13,18 @@ def calculate_total(cart):
 def index():
     donuts, addons = load_data()
     cart = session.get('cart', {})
+    selected_addons = session.get('selected_addons', [])
     total = calculate_total(cart)
-    return render_template('index.html', donuts=donuts, addons=addons, cart=cart, total=total)
+    return render_template('index.html', donuts=donuts, addons=addons, cart=cart, selected_addons=selected_addons, total=total)
 
 @app.route('/about')
 def about():
     return render_template('about.html')
 
-@app.route('/checkout')
-def checkout():
-    return render_template('invoice.html')
+@app.route('/invoices')
+def invoices():
+    return render_template('invoices.html')
+
 @app.route('/orders')
 def order_history():
     return render_template('order_history.html')
@@ -74,6 +76,30 @@ def remove_from_cart(item):
         flash("Item not found in cart")
         
     return redirect(url_for('index'))
+
+# Add selected addons to the session
+@app.route('/select_addon', methods=['POST'])
+def select_addon():
+    selected_addons = session.get('selected_addons', {})
+    _, addons = load_data() # we only need addons
+
+    selected_keys = request.form.getlist('addons')
+
+    if not selected_keys:
+        flash("No add-ons selected.")
+        return redirect(url_for('index'))
+
+    for addon in selected_keys:
+        if addon in addons:
+            selected_addons[addon] = float(addons[addon]['price'])
+
+    session['selected_addons'] = selected_addons
+    session.modified = True
+
+    flash("Add-ons added to cart.")
+
+    return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
