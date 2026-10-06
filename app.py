@@ -1,3 +1,4 @@
+import datetime
 import json
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 
@@ -12,7 +13,7 @@ def calculate_total(cart, selected_addons):
     total = donut_subtotal + addon_subtotal
 
     return total, donut_subtotal, addon_subtotal
-
+    
 @app.route('/') 
 def index():
     donuts, addons = load_data()
@@ -108,6 +109,53 @@ def select_addon():
 
     return redirect(url_for('index'))
 
+# Clear cart and addons from the session (cancel current order)
+@app.route('/cancel_order', methods=['POST'])
+def cancel_order():
+    session.pop('cart', None)
+    session.pop('selected_addons', None)
+    session.modified = True
+
+    flash("Order Cancelled. Your cart has been emptied.")
+
+    return redirect(url_for('index'))
+
+#Check out current order
+@app.route('/checkout', methods=['POST'])
+def checkout():
+    customer_name = request.form['customer_name'].strip().title()
+    # Check if the customer name has been entered, if not, display message
+    # and return to home page (index.html)
+    if not customer_name:
+        flash("Customer name is required.")
+        return redirect(url_for('index'))
+
+    # Get cart and selected addons from the session
+    cart = session.get('cart', {})
+    selected_addons = session.get('selected_addons', {})
+    
+    # Prevent checkout with an empty cart
+    if not cart:
+        flash("Your cart is empty.")
+        return redirect(url_for('index'))
+
+    total, donut_subtotal, addon_subtotal = calculate_total(cart, selected_addons)
+
+    invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    invoice_number = f"INV_{customer_name.replace(' ', '_')}_{invoice_date}"
+
+    # Display invoice information on confirmation page
+    return render_template(
+        'invoice.html',
+        customer_name=customer_name,
+        cart=cart,
+        selected_addons=selected_addons,
+        total=total,
+        donut_subtotal=donut_subtotal,
+        addon_subtotal=addon_subtotal,
+        invoice_date=invoice_date,
+        invoice_number=invoice_number
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
