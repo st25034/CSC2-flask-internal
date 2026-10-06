@@ -3,15 +3,6 @@
 {% block title %}Home - Donut Shop{% endblock %}
 
 {% block content %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
 <form action="{{ url_for('add_to_cart')}}" method="post">
     <fieldset>
         <legend for="donut">Select Donuts</legend>
@@ -67,18 +58,28 @@
     <p>Your cart is empty</p>
 {% endif %}
 
-
-
 <h3>Selected Add-ons</h3>
+
+{% if selected_addons %}
     <ul>
-        {% for addon in selected_addons %}
-            <li>{{ addon }}</li>
+        {% for addon, price in selected_addons.items() %}
+            <li>{{ addon }} - ${{ '%.2f' % price }}</li>
         {% endfor %}
     </ul>
+{% endif %}
+
 <h4>Add-ons subtotal: ${{ '%.2f' % addon_subtotal }}</h4>
 
 <h4>Total: ${{ '%.2f' % total }}</h4>
 
-</body>
-</html>
+<form action="{{ url_for('checkout') }}" method="post">
+    <label for="customer_name_checkout">Your Name:</label>
+    <input type="text" name="customer_name" id="customer_name_checkout" required>
+
+    <button type="submit">Checkout</button>
+    
+    <button type="submit" formaction="{{ url_for('cancel_order') }}"
+        onclick="return confirm('Are you sure you want to cancel your order?')">Cancel Order</button>
+</form>
+
 {% endblock %}
