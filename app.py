@@ -144,9 +144,14 @@ def checkout():
     invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     invoice_number = f"INV_{customer_name.replace(' ', '_')}_{invoice_date}"
 
+    # Clear cart and add-ons after checkout
+    session.pop('cart', None)
+    session.pop('selected_addons', None)
+    session.modified = True
+
     # Display invoice information on confirmation page
     return render_template(
-        'invoice.html',
+        'invoices.html',
         customer_name=customer_name,
         cart=cart,
         selected_addons=selected_addons,
