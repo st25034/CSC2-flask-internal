@@ -56,9 +56,28 @@ def about():
 def invoices():
     return render_template('invoices.html')
 
+# Order history page show past orders from the database
 @app.route('/orders')
 def order_history():
-    return render_template('order_history.html')
+    with sqlite3.connect('donut_shop.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM orders ORDER BY date DESC")
+        rows = cursor.fetchall()
+
+    orders = []
+
+    for row in rows:
+        orders.append({
+            'order_id': row[0],
+            'invoice_number': row[1],
+            'customer_name': row[2],
+            'items': json.loads(row[3]),
+            'addons': json.loads(row[4]),
+            'total': row[5],
+            'date': row[6]
+        })
+
+    return render_template('order_history.html', orders=orders)
 
 def load_data():
     with open('data/donuts.json') as file:
