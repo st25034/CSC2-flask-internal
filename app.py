@@ -13,7 +13,13 @@ def calculate_total(cart, selected_addons):
 
     total = donut_subtotal + addon_subtotal
 
-    return total, donut_subtotal, addon_subtotal
+    discount_applied = False
+
+    if total > 70:
+        total = total * 0.90
+        discount_applied = True
+
+    return total, donut_subtotal, addon_subtotal, discount_applied
 
 def initialise_database():
     with sqlite3.connect('donut_shop.db') as conn:
@@ -35,12 +41,12 @@ def index():
     donuts, addons = load_data()
     cart = session.get('cart', {})
     selected_addons = session.get('selected_addons', {})
-    total, donut_subtotal, addon_subtotal = calculate_total(cart, selected_addons)
+    total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(cart, selected_addons)
 
     if total > 50:
         flash("You are ordering a lot! Consider calling us for a special deal.")
 
-    return render_template('index.html', donuts=donuts, addons=addons, cart=cart, selected_addons=selected_addons, donut_subtotal=donut_subtotal, addon_subtotal=addon_subtotal, total=total)
+    return render_template('index.html', donuts=donuts, addons=addons, cart=cart, selected_addons=selected_addons, donut_subtotal=donut_subtotal, addon_subtotal=addon_subtotal, total=total, discount_applied=discount_applied)
 
 @app.route('/about')
 def about():
@@ -158,7 +164,10 @@ def checkout():
         return redirect(url_for('index'))
 
     # Calculate total
-    total, donut_subtotal, addon_subtotal = calculate_total(cart, selected_addons)
+    total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(cart, selected_addons)
+
+    subtotal = donut_subtotal + addon_subtotal
+    discount = subtotal - total
 
     # Create invoice number and date
     invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -190,7 +199,13 @@ def checkout():
         for addon, price in selected_addons.items():
             f.write(f"- {addon}: ${price:.2f}\n")
 
-        f.write(f"\nTotal: ${total:.2f}\n")
+        f.write("\nSummary\n")
+        f.write(f"Subtotal: ${subtotal:.2f}\n")
+
+        if discount_applied:
+            f.write(f"Discount (10%): -${discount:.2f}\n")
+
+        f.write(f"Total: ${total:.2f}\n")
 
     # Clear cart and add-ons after checkout
     session.pop('cart', None)
@@ -207,7 +222,10 @@ def checkout():
         donut_subtotal=donut_subtotal,
         addon_subtotal=addon_subtotal,
         invoice_date=invoice_date,
-        invoice_number=invoice_number
+        invoice_number=invoice_number,
+        discount_applied=discount_applied,
+        subtotal=subtotal,
+        discount=discount
     )
 
 if __name__ == '__main__':
