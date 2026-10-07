@@ -163,8 +163,35 @@ def checkout():
     # Create invoice number and date
     invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     invoice_number = f"INV_{customer_name.replace(' ', '_')}_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    
+    #Save order to SQLite database
+    with sqlite3.connect('donut_shop.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO orders (invoice_number, customer_name, items, addons, total)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (invoice_number, customer_name, json.dumps(cart), json.dumps(selected_addons), total))
+        conn.commit()
 
-   
+    # Generate invoice file
+    invoice_filename = f"{invoice_number}.txt"
+
+    with open(invoice_filename, 'w') as f:
+        f.write("DONUT SHOP INVOICE\n")
+        f.write(f"Invoice Number: {invoice_number}\n")
+        f.write(f"Customer Name: {customer_name}\n")
+        f.write(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+
+        f.write("Items:\n")
+        for item, details in cart.items():
+            f.write(f"- {item}: {details['quantity']} x ${details['price']} = ${details['quantity'] * details['price']:.2f}\n")
+
+        f.write("\nAdd-Ons:\n")
+        for addon, price in selected_addons.items():
+            f.write(f"- {addon}: ${price:.2f}\n")
+
+        f.write(f"\nTotal: ${total:.2f}\n")
+
     # Clear cart and add-ons after checkout
     session.pop('cart', None)
     session.pop('selected_addons', None)
