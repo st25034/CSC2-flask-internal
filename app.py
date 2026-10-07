@@ -182,6 +182,20 @@ def checkout():
         ''', (invoice_number, customer_name, json.dumps(cart), json.dumps(selected_addons), total))
         conn.commit()
 
+    # Update the stock in donuts.json
+    with open('data/donuts.json', 'r') as file:
+        donut_data = json.load(file)
+
+    for donut_name, details in cart.items():
+        if donut_name in donut_data:
+            donut_data[donut_name]['stock'] -= details['quantity']
+
+            if donut_data[donut_name]['stock'] < 0:
+                donut_data[donut_name]['stock'] = 0
+
+    with open('data/donuts.json', 'w') as file:
+        json.dump(donut_data, file, indent=4)
+
     # Generate invoice file
     invoice_filename = f"{invoice_number}.txt"
 
