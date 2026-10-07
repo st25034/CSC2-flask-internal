@@ -35,6 +35,14 @@
     <p>No add-ons selected.</p>
 {% endif %}
 
+<h3>Summary</h3>
+
+<p>Subtotal: ${{ '%.2f' % subtotal }}</p>
+
+{% if discount_applied %}
+    <p>Discount (10%): -${{ '%.2f' % discount }}</p>
+{% endif %}
+
 <h3>Total: ${{ '%.2f' % total }}</h3>
 
 <a href="{{ url_for('index') }}">Back to shop</a>
