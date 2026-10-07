@@ -1,4 +1,5 @@
 import datetime
+import sqlite3
 import json
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 
@@ -13,6 +14,21 @@ def calculate_total(cart, selected_addons):
     total = donut_subtotal + addon_subtotal
 
     return total, donut_subtotal, addon_subtotal
+
+def initialise_database():
+    with sqlite3.connect('donut_shop.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS orders (
+                order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                invoice_number TEXT,
+                customer_name TEXT,
+                items TEXT,
+                addons TEXT,
+                total REAL,
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
     
 @app.route('/') 
 def index():
@@ -123,6 +139,8 @@ def cancel_order():
 #Check out current order
 @app.route('/checkout', methods=['POST'])
 def checkout():
+
+    #Validate customer name
     customer_name = request.form['customer_name'].strip().title()
     # Check if the customer name has been entered, if not, display message
     # and return to home page (index.html)
@@ -130,7 +148,7 @@ def checkout():
         flash("Customer name is required.")
         return redirect(url_for('index'))
 
-    # Get cart and selected addons from the session
+    # Get selected donuts (cart) and selected addons from the session
     cart = session.get('cart', {})
     selected_addons = session.get('selected_addons', {})
     
@@ -139,11 +157,14 @@ def checkout():
         flash("Your cart is empty.")
         return redirect(url_for('index'))
 
+    # Calculate total
     total, donut_subtotal, addon_subtotal = calculate_total(cart, selected_addons)
 
+    # Create invoice number and date
     invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    invoice_number = f"INV_{customer_name.replace(' ', '_')}_{invoice_date}"
+    invoice_number = f"INV_{customer_name.replace(' ', '_')}_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 
+   
     # Clear cart and add-ons after checkout
     session.pop('cart', None)
     session.pop('selected_addons', None)
@@ -163,4 +184,5 @@ def checkout():
     )
 
 if __name__ == '__main__':
+    initialise_database()
     app.run(debug=True)
