@@ -81,7 +81,16 @@ def add_to_cart():
         return redirect(url_for('index'))
 
     if donut in cart:
-        cart[donut]['quantity'] += quantity
+        new_quantity = cart[donut]['quantity'] + quantity
+    else:
+        new_quantity = quantity
+
+    if new_quantity > donuts[donut]['stock']:
+        flash(f"Not enough {donut} in stock. Only {donuts[donut]['stock']} available.")
+        return redirect(url_for('index'))
+
+    if donut in cart:
+        cart[donut]['quantity'] = new_quantity
     else:
         cart[donut] = {
             'price': donuts[donut]['price'],
