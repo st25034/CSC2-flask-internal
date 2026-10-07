@@ -3,6 +3,39 @@
 {% block title %}Invoices - Donut Shop{% endblock %}
 
 {% block content %}
-<h2>Invoices</h2>
-<p>This page will show the customer invoice after checkout</p>
+<h2>Invoice</h2>
+
+<p>Thank you for your order!</p>
+
+<p><strong>Invoice Number:</strong> {{ invoice_number }}</p>
+<p><strong>Customer Name:</strong> {{ customer_name }}</p>
+<p><strong>Date:</strong> {{ invoice_date }}</p>
+
+<h3>Items</h3>
+
+<ul>
+    {% for item, details in cart.items() %}
+        <li>
+            {{ item }}: {{ details['quantity'] }} x
+            ${{ details['price'] }} -
+            ${{ '%.2f' % (details['quantity'] * details['price']) }}
+        </li>
+    {% endfor %}
+</ul>
+
+<h3>Add-Ons</h3>
+
+{% if selected_addons %}
+    <ul>
+        {% for addon, price in selected_addons.items() %}
+            <li>{{ addon }}: ${{ '%.2f' % price }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No add-ons selected.</p>
+{% endif %}
+
+<h3>Total: ${{ '%.2f' % total }}</h3>
+
+<a href="{{ url_for('index') }}">Back to shop</a>
 {% endblock %}
