@@ -79,14 +79,29 @@ def order_history():
 
     return render_template('order_history.html', orders=orders)
 
+# Delete an order from the database by ID
+@app.route('/cancel_saved_order/<int:order_id>', methods=['POST'])
+def cancel_saved_order(order_id):
+    with sqlite3.connect('donut_shop.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM orders WHERE order_id = ?", (order_id,))
+        conn.commit()
+
+    flash("Order cancelled")
+    return redirect(url_for('order_history'))
+
 def load_data():
-    with open('data/donuts.json') as file:
-        donuts = json.load(file)
+    try:
+        with open('data/donuts.json') as file:
+            donuts = json.load(file)
 
-    with open('data/addons.json') as file:
-        addons = json.load(file)
+        with open('data/addons.json') as file:
+            addons = json.load(file)
 
-    return donuts, addons 
+        return donuts, addons 
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading data: {e}")
+        return {}, {}
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
@@ -202,52 +217,66 @@ def checkout():
     invoice_number = f"INV_{customer_name.replace(' ', '_')}_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     
     #Save order to SQLite database
-    with sqlite3.connect('donut_shop.db') as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO orders (invoice_number, customer_name, items, addons, total)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (invoice_number, customer_name, json.dumps(cart), json.dumps(selected_addons), total))
-        conn.commit()
+    try:
+        with sqlite3.connect('donut_shop.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO orders (invoice_number, customer_name, items, addons, total)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (invoice_number, customer_name, json.dumps(cart), json.dumps(selected_addons), total))
+            conn.commit()
+
+    except sqlite3.Error as e:
+        flash("Database error occurred.")
+        print(f"SQLite error: {e}")
 
     # Update the stock in donuts.json
-    with open('data/donuts.json', 'r') as file:
-        donut_data = json.load(file)
+    try: 
+        with open('data/donuts.json', 'r') as file:
+            donut_data = json.load(file)
 
-    for donut_name, details in cart.items():
-        if donut_name in donut_data:
-            donut_data[donut_name]['stock'] -= details['quantity']
+        for donut_name, details in cart.items():
+            if donut_name in donut_data:
+                donut_data[donut_name]['stock'] -= details['quantity']
 
-            if donut_data[donut_name]['stock'] < 0:
-                donut_data[donut_name]['stock'] = 0
+                if donut_data[donut_name]['stock'] < 0:
+                    donut_data[donut_name]['stock'] = 0
 
-    with open('data/donuts.json', 'w') as file:
-        json.dump(donut_data, file, indent=4)
+        with open('data/donuts.json', 'w') as file:
+            json.dump(donut_data, file, indent=4)
+    
+    except OSError as e:
+        flash("Could not update stock file.")
+        print(f"Error updating stock: {e}")
 
     # Generate invoice file
     invoice_filename = f"{invoice_number}.txt"
+    try:
+        with open(invoice_filename, 'w') as f:
+            f.write("DONUT SHOP INVOICE\n")
+            f.write(f"Invoice Number: {invoice_number}\n")
+            f.write(f"Customer Name: {customer_name}\n")
+            f.write(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
 
-    with open(invoice_filename, 'w') as f:
-        f.write("DONUT SHOP INVOICE\n")
-        f.write(f"Invoice Number: {invoice_number}\n")
-        f.write(f"Customer Name: {customer_name}\n")
-        f.write(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+            f.write("Items:\n")
+            for item, details in cart.items():
+                f.write(f"- {item}: {details['quantity']} x ${details['price']} = ${details['quantity'] * details['price']:.2f}\n")
 
-        f.write("Items:\n")
-        for item, details in cart.items():
-            f.write(f"- {item}: {details['quantity']} x ${details['price']} = ${details['quantity'] * details['price']:.2f}\n")
+            f.write("\nAdd-Ons:\n")
+            for addon, price in selected_addons.items():
+                f.write(f"- {addon}: ${price:.2f}\n")
 
-        f.write("\nAdd-Ons:\n")
-        for addon, price in selected_addons.items():
-            f.write(f"- {addon}: ${price:.2f}\n")
+            f.write("\nSummary\n")
+            f.write(f"Subtotal: ${subtotal:.2f}\n")
 
-        f.write("\nSummary\n")
-        f.write(f"Subtotal: ${subtotal:.2f}\n")
+            if discount_applied:
+                f.write(f"Discount (10%): -${discount:.2f}\n")
 
-        if discount_applied:
-            f.write(f"Discount (10%): -${discount:.2f}\n")
+            f.write(f"Total: ${total:.2f}\n")
 
-        f.write(f"Total: ${total:.2f}\n")
+    except OSError as e:
+        flash("Could not generate invoice file.")
+        print(f"Error writing invoice: {e}")
 
     # Clear cart and add-ons after checkout
     session.pop('cart', None)
