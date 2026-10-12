@@ -3,20 +3,33 @@
 {% block title %}Home - Donut Shop{% endblock %}
 
 {% block content %}
-<form action="{{ url_for('add_to_cart')}}" method="post">
-    <fieldset>
-        <legend for="donut">Select Donuts</legend>
-        <select name="donut" id="donut">
-            {% for donut, details in donuts.items() %}
-            <option value="{{ donut }}">{{ donut }} ${{ details ['price'] }}</option>
-            {% endfor %}
-        </select>
-        <label for="quantity">Quantity</label>
-        <input type="number" name="quantity" value="1" min="1">
-        <button type="submit">Add to cart</button>
-    </fieldset>
-</form>
+<h2>Our Donuts</h2>
 
+<div class="donut-grid">
+    {% for donut, details in donuts.items() %}
+        <div class="donut-card">
+            <img src="{{ url_for('static', filename='images/' + donut|lower|replace(' ', '-') + '.jpg') }}"
+                 alt="{{ donut }}">
+
+            <h3>{{ donut }}</h3>
+            <p>${{ '%.2f' % details['price'] }}</p>
+
+            <form action="{{ url_for('add_to_cart') }}" method="post">
+                <input type="hidden" name="donut" value="{{ donut }}">
+
+                <label for="quantity-{{ loop.index }}">Quantity:</label>
+                <input type="number"
+                       name="quantity"
+                       id="quantity-{{ loop.index }}"
+                       value="1"
+                       min="1"
+                       max="{{ details['stock'] }}">
+
+                <button type="submit">Add to Cart</button>
+            </form>
+        </div>
+    {% endfor %}
+</div>
 <!-- Add-ons form -->
 <form action="{{ url_for('select_addon') }}" method="post">
     <fieldset>
