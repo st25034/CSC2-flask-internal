@@ -16,16 +16,28 @@
 
             <form action="{{ url_for('add_to_cart') }}" method="post">
                 <input type="hidden" name="donut" value="{{ donut }}">
-
+  
+            {% if details['stock'] > 0 %}
                 <label for="quantity-{{ loop.index }}">Quantity:</label>
                 <input type="number"
-                       name="quantity"
-                       id="quantity-{{ loop.index }}"
-                       value="1"
-                       min="1"
-                       max="{{ details['stock'] }}">
+                    name="quantity"
+                    id="quantity-{{ loop.index }}"
+                    value="1"
+                    min="1"
+                    max="{{ details['stock'] }}">
 
                 <button type="submit">Add to Cart</button>
+            {% else %}
+                <p>Out of stock</p>
+                <label for="quantity-{{ loop.index }}">Quantity:</label>
+                <input type="number"
+                    id="quantity-{{ loop.index }}"
+                    value="0"
+                    disabled>
+
+                <button type="button" disabled>Out of Stock</button>
+            {% endif %}
+            
             </form>
         </div>
     {% endfor %}
@@ -52,51 +64,4 @@
         </ul>
     {% endif %}
 {% endwith %}
-
-<h2>Your Cart</h2>
-{% if cart %}
-    <ul>
-        {% for item, details in cart.items()%}
-            <li>{{ item }}: {{ '%.2f' % details ['quantity'] }} x
-                                        ${{ details['price'] }}
-                = ${{ details ['quantity'] * details ['price'] }}
-                <a href="{{ url_for('remove_from_cart', item=item) }}">[Remove]</a>
-            </li>
-        {% endfor %}
-    </ul>
-
-    <h4>Donuts subtotal: ${{ '%.2f' % donut_subtotal }}</h4>
-
-{% else %}
-    <p>Your cart is empty</p>
-{% endif %}
-
-<h3>Selected Add-ons</h3>
-
-{% if selected_addons %}
-    <ul>
-        {% for addon, price in selected_addons.items() %}
-            <li>{{ addon }} - ${{ '%.2f' % price }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
-
-<h4>Add-ons subtotal: ${{ '%.2f' % addon_subtotal }}</h4>
-
-{% if discount_applied %}
-    <h4>Discount (10%): -${{ '%.2f' % ((donut_subtotal + addon_subtotal) - total) }}</h4>
-{% endif %}
-
-<h4>Total: ${{ '%.2f' % total }}</h4>
-
-<form action="{{ url_for('checkout') }}" method="post">
-    <label for="customer_name_checkout">Your Name:</label>
-    <input type="text" name="customer_name" id="customer_name_checkout" required>
-
-    <button type="submit">Checkout</button>
-
-    <button type="submit" formaction="{{ url_for('cancel_order') }}"
-        onclick="return confirm('Are you sure you want to cancel your order?')">Cancel Order</button>
-</form>
-
 {% endblock %}
