@@ -36,17 +36,15 @@ def initialise_database():
             )
         ''')
     
-@app.route('/') 
+@app.route('/')
 def index():
+    return render_template('index.html')
+
+
+@app.route('/menu')
+def menu():
     donuts, addons = load_data()
-    cart = session.get('cart', {})
-    selected_addons = session.get('selected_addons', {})
-    total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(cart, selected_addons)
-
-    if total > 50:
-        flash("You are ordering a lot! Consider calling us for a special deal.")
-
-    return render_template('index.html', donuts=donuts, addons=addons, cart=cart, selected_addons=selected_addons, donut_subtotal=donut_subtotal, addon_subtotal=addon_subtotal, total=total, discount_applied=discount_applied)
+    return render_template('menu.html', donuts=donuts, addons=addons)
 
 @app.route('/about')
 def about():
@@ -112,7 +110,7 @@ def add_to_cart():
 
     if donut not in donuts:
         flash("Invalid donut selected.")
-        return redirect(url_for('index'))
+        return redirect(url_for('menu'))
 
     if donut in cart:
         new_quantity = cart[donut]['quantity'] + quantity
@@ -121,7 +119,7 @@ def add_to_cart():
 
     if new_quantity > donuts[donut]['stock']:
         flash(f"Not enough {donut} in stock. Only {donuts[donut]['stock']} available.")
-        return redirect(url_for('index'))
+        return redirect(url_for('menu'))
 
     if donut in cart:
         cart[donut]['quantity'] = new_quantity
@@ -134,7 +132,7 @@ def add_to_cart():
     session['cart'] = cart
     session.modified = True
     flash(f"{quantity} {donut}(s) added to cart.")
-    return redirect(url_for('index'))
+    return redirect(url_for('menu'))
 
 # Remove an item from the shopping cart
 @app.route('/remove_from_cart/<item>')
@@ -161,7 +159,7 @@ def select_addon():
 
     if not selected_keys:
         flash("No add-ons selected.")
-        return redirect(url_for('index'))
+        return redirect(url_for('menu'))
 
     for addon in selected_keys:
         if addon in addons:
@@ -172,7 +170,7 @@ def select_addon():
 
     flash(f"{len(selected_addons)} add-on(s) added to cart.")
 
-    return redirect(url_for('index'))
+    return redirect(url_for('menu'))
 
 # Remove an add-on from the shopping cart
 @app.route('/remove_addon/<addon>')
@@ -229,7 +227,7 @@ def checkout():
     # and return to home page (index.html)
     if not customer_name:
         flash("Customer name is required.")
-        return redirect(url_for('index'))
+        return redirect(url_for('menu'))
 
     # Get selected donuts (cart) and selected addons from the session
     cart = session.get('cart', {})
@@ -238,7 +236,7 @@ def checkout():
     # Prevent checkout with an empty cart
     if not cart:
         flash("Your cart is empty.")
-        return redirect(url_for('index'))
+        return redirect(url_for('menu'))
 
     # Calculate total
     total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(cart, selected_addons)
