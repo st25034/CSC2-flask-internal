@@ -56,4 +56,16 @@
 
     <button type="submit" formaction="{{ url_for('cancel_order') }}"
         onclick="return confirm('Are you sure you want to cancel your order?')">Cancel Order</button>
+
+        
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class="flashes">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
 {% endblock %}
