@@ -186,6 +186,60 @@ tr:nth-child(even) {
     margin-top: 8px;
 }
 
+.hero-content {
+    background-color: transparent;
+    padding: 30px;
+    border-radius: 0;
+    max-width: 600px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+.hero-content h2 {
+    font-family: "Archivo Black", sans-serif;
+    font-size: 42px;
+    margin-bottom: 12px;
+}
+
+.hero-content p {
+    font-size: 18px;
+    margin-bottom: 25px;
+}
+
+.hero-content h2,
+.hero-content p {
+    color: white;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+}
+.order-button {
+    display: inline-block;
+    background-color: #99582A;
+    color: #FFFFFF;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.order-button:hover {
+    background-color: #6E4021;
+    color: #FFFFFF;
+    transform: scale(1.08);
+}
+
+.about-donuttery {
+    max-width: 850px;
+    margin: 40px auto;
+    padding: 20px;
+    text-align: center;
+    line-height: 1.7;
+}
+
+.about-donuttery h2 {
+    font-size: 28px;
+}
+
+
 /* Footer */
 footer {
     text-align: center;
@@ -243,4 +297,28 @@ footer {
     .donut-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+/* Full-width homepage hero */
+main:has(.hero) {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.hero {
+    width: 100%;
+    min-height: 450px;
+    box-sizing: border-box;
+    background-image: url("../images/donut-header.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+    margin: 0;
+    border-radius: 0;
 }
