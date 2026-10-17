@@ -1,7 +1,11 @@
     <!DOCTYPE html>
     <html lang="en">
     <head>
-        <title>{% block title %}Donut Shop{% endblock %}</title>
+        <title>{% block title %}Donuttery{% endblock %}</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
@@ -18,12 +22,9 @@
 
                 <nav>
                     <a href="{{ url_for('index') }}">Home</a>
-                    <a href="{{ url_for('about') }}">About</a>
+                    <a href="{{ url_for('menu') }}">Menu</a>
                     <a href="{{ url_for('order_history') }}">Order History</a>
-                    <a href="{{ url_for('invoices') }}">Invoices</a>
-                    <a href="{{ url_for('cart') }}" class="cart-link" aria-label="View shopping cart">
-                        <span class="cart-icon">🛒</span>
-                    </a>
+                    <a href="{{ url_for('cart') }}">Cart</a>
 >
                 </nav>
 
