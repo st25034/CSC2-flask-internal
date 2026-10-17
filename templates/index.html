@@ -1,67 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Donut Shop{% endblock %}
+{% block title %}Home - Donuttery{% endblock %}
 
 {% block content %}
-<h2>Our Donuts</h2>
+<section class="hero">
+    <div class="hero-content">
+        <h2>DONUTTERY</h2>
+        <p><strong>SWEETEN YOUR DAY!</strong></p>
+        <a href="{{ url_for('menu') }}" class="order-button">
+            ORDER NOW
+        </a>
+    </div>
+</section>
 
-<div class="donut-grid">
-    {% for donut, details in donuts.items() %}
-        <div class="donut-card">
-            <img src="{{ url_for('static', filename='images/' + donut|lower|replace(' ', '-') + '.jpg') }}"
-                 alt="{{ donut }}">
-
-            <h3>{{ donut }}</h3>
-            <p>${{ '%.2f' % details['price'] }}</p>
-
-            <form action="{{ url_for('add_to_cart') }}" method="post">
-                <input type="hidden" name="donut" value="{{ donut }}">
-  
-            {% if details['stock'] > 0 %}
-                <label for="quantity-{{ loop.index }}">Quantity:</label>
-                <input type="number"
-                    name="quantity"
-                    id="quantity-{{ loop.index }}"
-                    value="1"
-                    min="1"
-                    max="{{ details['stock'] }}">
-
-                <button type="submit">Add to Cart</button>
-            {% else %}
-                <p>Out of stock</p>
-                <label for="quantity-{{ loop.index }}">Quantity:</label>
-                <input type="number"
-                    id="quantity-{{ loop.index }}"
-                    value="0"
-                    disabled>
-
-                <button type="button" disabled>Out of Stock</button>
-            {% endif %}
-            
-            </form>
-        </div>
-    {% endfor %}
-</div>
-<!-- Add-ons form -->
-<form action="{{ url_for('select_addon') }}" method="post">
-    <fieldset>
-        <legend>Add-ons</legend>
-        {% for addon, data in addons.items() %}
-            <label>
-                <input type="checkbox" name="addons" value="{{ addon }}">
-                {{ addon }} (${{ data.price }})
-            </label><br>
-        {% endfor %}
-        <button type="submit">Add to Cart</button>
-    </fieldset>
-</form>
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <ul class="flashes">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
+<section class="about-donuttery">
+    <h2>About Donuttery</h2>
+    <p>
+        Welcome to Donuttery, your place for delicious donuts
+        and sweet treats. Browse our menu, choose your favourite
+        flavours and add optional extras to make your order special.
+        We aim to make ordering your favourite donuts simple and enjoyable.
+    </p>
+</section>
 {% endblock %}
