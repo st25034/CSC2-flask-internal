@@ -44,7 +44,16 @@ def index():
 @app.route('/menu')
 def menu():
     donuts, addons = load_data()
-    return render_template('menu.html', donuts=donuts, addons=addons)
+    cart = session.get('cart', {})
+    selected_addons = session.get('selected_addons', {})
+    total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(cart, selected_addons)
+
+    if total > 70:
+        flash("Great news! You've unlocked 10% off your order!")
+    elif total > 50:
+        flash("You're almost there! Spend over $70 to receive 10% off your order.")
+
+    return render_template('menu.html', donuts=donuts, addons=addons, cart=cart, selected_addons=selected_addons, donut_subtotal=donut_subtotal, addon_subtotal=addon_subtotal, total=total, discount_applied=discount_applied)
 
 @app.route('/about')
 def about():
