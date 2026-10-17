@@ -149,7 +149,7 @@ def remove_from_cart(item):
     else:
         flash("Item not found in cart")
         
-    return redirect(url_for('index'))
+    return redirect(url_for('cart'))
 
 # Add selected addons to the session
 @app.route('/select_addon', methods=['POST'])
@@ -174,6 +174,21 @@ def select_addon():
 
     return redirect(url_for('index'))
 
+# Remove an add-on from the shopping cart
+@app.route('/remove_addon/<addon>')
+def remove_addon(addon):
+    selected_addons = session.get('selected_addons', {})
+
+    if addon in selected_addons:
+        del selected_addons[addon]
+        session['selected_addons'] = selected_addons
+        session.modified = True
+        flash(f"Removed {addon} from the cart.")
+    else:
+        flash("Add-on not found in cart")
+
+    return redirect(url_for('cart'))
+
 # Clear cart and addons from the session (cancel current order)
 @app.route('/cancel_order', methods=['POST'])
 def cancel_order():
@@ -183,7 +198,26 @@ def cancel_order():
 
     flash("Order Cancelled. Your cart has been emptied.")
 
-    return redirect(url_for('index'))
+    return redirect(url_for('cart'))
+
+@app.route('/cart')
+def cart():
+    cart = session.get('cart', {})
+    selected_addons = session.get('selected_addons', {})
+
+    total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(
+        cart, selected_addons
+    )
+
+    return render_template(
+        'cart.html',
+        cart=cart,
+        selected_addons=selected_addons,
+        total=total,
+        donut_subtotal=donut_subtotal,
+        addon_subtotal=addon_subtotal,
+        discount_applied=discount_applied
+    )
 
 #Check out current order
 @app.route('/checkout', methods=['POST'])
