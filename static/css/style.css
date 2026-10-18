@@ -217,6 +217,17 @@ td .order-action-button {
     margin-top: 8px;
 }
 
+/* Consistent zoom and font for buttons */
+.zoom-button {
+    font-family: Consolas, monospace;
+    font-size: 14px;
+    transition: transform 0.2s ease;
+}
+
+.zoom-button:hover {
+    transform: scale(1.03);
+}
+
 /* Header section */
 .hero-content {
     background-color: transparent;
@@ -373,9 +384,11 @@ td .order-action-button {
     color: #FFFFFF;
 }
 
-/* View Invoice Button */
+/* Order history buttons */
 .view-invoice-button, 
 .order-action-button {
+    font-family: Consolas, monospace;
+    font-size: 14px;
     display: inline-block;
     margin-top: 8px;
     padding: 10px 16px;
