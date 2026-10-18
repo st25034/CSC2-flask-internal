@@ -292,6 +292,13 @@ def cart():
         cart, selected_addons
     )
 
+    subtotal = donut_subtotal + addon_subtotal
+
+    if subtotal > 70:
+        flash("Great news! You've unlocked 10% off your order!")
+    elif subtotal > 50:
+        flash("You're almost there! Spend over $70 to receive 10% off your order.")
+
     return render_template(
         'cart.html',
         cart=cart,
