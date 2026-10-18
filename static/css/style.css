@@ -373,6 +373,25 @@ td .order-action-button {
     color: #FFFFFF;
 }
 
+/* View Invoice Button */
+.view-invoice-button, 
+.order-action-button {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 10px 16px;
+    background-color: #99582A;
+    color: #FFFFFF;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.view-invoice-button:hover, 
+.order-action-button:hover {
+    background-color: #6E4021;
+    color: #FFFFFF;
+}
 
 /* Footer */
 footer {
