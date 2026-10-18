@@ -1,49 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}Invoices - Donut Shop{% endblock %}
+{% block title %}Invoices - Donuttery{% endblock %}
 
 {% block content %}
-<h2>Invoice</h2>
+<div class="invoice-card">
+    <h2>Invoice</h2>
 
-<p>Thank you for your order!</p>
+    <p class="invoice-thank-you">Thank you for your order!</p>
 
-<p><strong>Invoice Number:</strong> {{ invoice_number }}</p>
-<p><strong>Customer Name:</strong> {{ customer_name }}</p>
-<p><strong>Date:</strong> {{ invoice_date }}</p>
+    <div class="invoice-details">
+        <p><strong>Invoice Number:</strong> {{ invoice_number }}</p>
+        <p><strong>Customer Name:</strong> {{ customer_name }}</p>
+        <p><strong>Date:</strong> {{ invoice_date }}</p>
+    </div>
 
-<h3>Items</h3>
+    <div class="invoice-section">
+        <h3>Items</h3>
 
-<ul>
-    {% for item, details in cart.items() %}
-        <li>
-            {{ item }}: {{ details['quantity'] }} x
-            ${{ details['price'] }} -
-            ${{ '%.2f' % (details['quantity'] * details['price']) }}
-        </li>
-    {% endfor %}
-</ul>
+        {% if cart %}
+            <ul class="invoice-list">
+                {% for item, details in cart.items() %}
+                    <li>
+                        <span>{{ item }}: {{ details['quantity'] }} x ${{ '%.2f' % details['price'] }}</span>
+                        <strong>${{ '%.2f' % (details['quantity'] * details['price']) }}</strong>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No items in this order.</p>
+        {% endif %}
+    </div>
 
-<h3>Add-Ons</h3>
+    <div class="invoice-section">
+        <h3>Add-Ons</h3>
 
-{% if selected_addons %}
-    <ul>
-        {% for addon, price in selected_addons.items() %}
-            <li>{{ addon }}: ${{ '%.2f' % price }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No add-ons selected.</p>
-{% endif %}
+        {% if selected_addons %}
+            <ul class="invoice-list">
+                {% for addon, price in selected_addons.items() %}
+                    <li>
+                        <span>{{ addon }}</span>
+                        <strong>${{ '%.2f' % price }}</strong>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No add-ons selected.</p>
+        {% endif %}
+    </div>
 
-<h3>Summary</h3>
+    <div class="invoice-section invoice-summary">
+        <h3>Summary</h3>
 
-<p>Subtotal: ${{ '%.2f' % subtotal }}</p>
+        <p>
+            <span>Subtotal:</span>
+            <strong>${{ '%.2f' % subtotal }}</strong>
+        </p>
 
-{% if discount_applied %}
-    <p>Discount (10%): -${{ '%.2f' % discount }}</p>
-{% endif %}
+        {% if discount_applied %}
+            <p>
+                <span>Discount (10%):</span>
+                <strong>-${{ '%.2f' % discount }}</strong>
+            </p>
+        {% endif %}
 
-<h3>Total: ${{ '%.2f' % total }}</h3>
+        <p class="invoice-total">
+            <span>Total:</span>
+            <strong>${{ '%.2f' % total }}</strong>
+        </p>
+    </div>
 
-<a href="{{ url_for('index') }}">Back to shop</a>
+    <a href="{{ url_for('index') }}" class="back-button">← Back to home</a>
+</div>
 {% endblock %}
