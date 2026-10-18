@@ -406,6 +406,105 @@ td .order-action-button {
     color: #FFFFFF;
 }
 
+/* Invoice Card */
+.invoice-card {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #FFF6DE;
+    border: 2px solid #59231A;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(67, 40, 24, 0.12);
+    box-sizing: border-box;
+}
+
+.invoice-card h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.invoice-thank-you {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* Invoice number, customer and date */
+.invoice-details {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #E6D2A8;
+}
+
+.invoice-details p {
+    margin: 10px 0;
+    overflow-wrap: anywhere;
+}
+
+/* Invoice sections */
+.invoice-section {
+    padding: 20px 0;
+    border-bottom: 1px solid #E6D2A8;
+}
+
+.invoice-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+/* Items and add-ons */
+.invoice-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.invoice-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 10px 0;
+    margin: 0;
+    border-bottom: 1px solid #E6D2A8;
+}
+
+.invoice-list li:last-child {
+    border-bottom: none;
+}
+
+.invoice-list li span {
+    overflow-wrap: anywhere;
+}
+
+.invoice-list li strong {
+    white-space: nowrap;
+}
+
+/* Invoice summary */
+.invoice-summary {
+    border-bottom: none;
+}
+
+.invoice-summary p {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 12px 0;
+}
+
+.invoice-total {
+    padding-top: 15px;
+    border-top: 1px solid #E6D2A8;
+    font-size: 20px;
+    color: #6F1D1B;
+}
+
+/* Invoice back button */
+.invoice-card .back-button {
+    margin-top: 10px;
+}
+
+
 /* Footer */
 footer {
     text-align: center;
@@ -456,6 +555,19 @@ footer {
 
     .donut-grid {
         grid-template-columns: 1fr;
+    }
+
+     .invoice-card {
+        padding: 20px 15px;
+        margin: 20px auto;
+    }
+
+    .invoice-list li {
+        gap: 10px;
+    }
+
+    .invoice-total {
+        font-size: 18px;
     }
 }
 
