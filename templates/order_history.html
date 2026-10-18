@@ -66,8 +66,13 @@
                         <td>
                             <form action="{{ url_for('cancel_saved_order', order_id=order.order_id) }}" method="post"
                                 onsubmit="return confirm('Cancel this order?')">
-                                <button type="submit">Cancel</button>
+                                <button type="submit" class="order-action-button">Cancel</button>
                             </form>
+
+                            <a href="{{ url_for('view_invoice', order_id=order.order_id) }}"
+                                class="view-invoice-button">
+                                    View Invoice
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}
