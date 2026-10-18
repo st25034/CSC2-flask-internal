@@ -47,10 +47,11 @@ def menu():
     cart = session.get('cart', {})
     selected_addons = session.get('selected_addons', {})
     total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(cart, selected_addons)
+    subtotal = donut_subtotal + addon_subtotal
 
-    if total > 70:
+    if subtotal > 70:
         flash("Great news! You've unlocked 10% off your order!")
-    elif total > 50:
+    elif subtotal > 50:
         flash("You're almost there! Spend over $70 to receive 10% off your order.")
 
     return render_template('menu.html', donuts=donuts, addons=addons, cart=cart, selected_addons=selected_addons, donut_subtotal=donut_subtotal, addon_subtotal=addon_subtotal, total=total, discount_applied=discount_applied)
@@ -85,6 +86,53 @@ def order_history():
         })
 
     return render_template('order_history.html', orders=orders)
+
+# View a customer's saved invoice
+@app.route('/view_invoice/<int:order_id>')
+def view_invoice(order_id):
+    with sqlite3.connect('donut_shop.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT * FROM orders WHERE order_id = ?",
+            (order_id,)
+        )
+        row = cursor.fetchone()
+
+    if row is None:
+        flash("Invoice not found.")
+        return redirect(url_for('order_history'))
+
+    customer_name = row[2]
+    cart = json.loads(row[3])
+    selected_addons = json.loads(row[4])
+    total = row[5]
+    invoice_date = row[6]
+    invoice_number = row[1]
+
+    # Calculate the invoice subtotals
+    donut_subtotal = sum(
+        item['price'] * item['quantity']
+        for item in cart.values()
+    )
+    addon_subtotal = sum(selected_addons.values())
+    subtotal = donut_subtotal + addon_subtotal
+    discount = subtotal - total
+    discount_applied = discount > 0
+
+    return render_template(
+        'invoices.html',
+        customer_name=customer_name,
+        cart=cart,
+        selected_addons=selected_addons,
+        total=total,
+        donut_subtotal=donut_subtotal,
+        addon_subtotal=addon_subtotal,
+        invoice_date=invoice_date,
+        invoice_number=invoice_number,
+        discount_applied=discount_applied,
+        subtotal=subtotal,
+        discount=discount
+    )
 
 # Delete an order from the database by ID
 @app.route('/cancel_saved_order/<int:order_id>', methods=['POST'])
@@ -156,6 +204,34 @@ def remove_from_cart(item):
     else:
         flash("Item not found in cart")
         
+    return redirect(url_for('cart'))
+
+# Update the quantity of a donut in the shopping cart
+@app.route('/update_quantity', methods=['POST'])
+def update_quantity():
+    donut = request.form.get('donut')
+    quantity = request.form.get('quantity', type=int)
+
+    cart = session.get('cart', {})
+    donuts, addons = load_data()
+
+    if donut not in cart or donut not in donuts:
+        flash("Sorry, that donut could not be found.")
+        return redirect(url_for('cart'))
+
+    if quantity is None or quantity < 1:
+        flash("Quantity must be at least 1.")
+        return redirect(url_for('cart'))
+
+    if quantity > donuts[donut]['stock']:
+        flash(f"Sorry, only {donuts[donut]['stock']} {donut}(s) are available.")
+        return redirect(url_for('cart'))
+
+    cart[donut]['quantity'] = quantity
+    session['cart'] = cart
+    session.modified = True
+
+    flash(f"Updated {donut} quantity.")
     return redirect(url_for('cart'))
 
 # Add selected addons to the session
