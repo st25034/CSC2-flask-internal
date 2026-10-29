@@ -1,3 +1,4 @@
+/* Default font, colours and background. */
 body {
     font-family: Consolas, monospace;
     margin: 0;
@@ -80,7 +81,7 @@ button:hover {
     background-color: #6E4021;
 }
 
-/* Cart */
+/* Headings and Links */
 h2 {
     margin-top: 30px;
 }
@@ -155,7 +156,7 @@ tbody tr:nth-child(even) {
     background-color: #FFF8E3;
 }
 
-/* Spacing out items in table */
+/* Spacing of list in table */
 td ul {
     margin: 0;
     padding-left: 18px;
@@ -271,6 +272,7 @@ td .order-action-button {
     transform: scale(1.08);
 }
 
+/* About section */
 .about-donuttery {
     max-width: 850px;
     margin: 40px auto;
@@ -281,6 +283,30 @@ td .order-action-button {
 
 .about-donuttery h2 {
     font-size: 28px;
+}
+
+/* Full-width homepage hero */
+main:has(.hero) {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.hero {
+    width: 100%;
+    min-height: 450px;
+    box-sizing: border-box;
+    background-image: url("../images/donut-header.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+    margin: 0;
+    border-radius: 0;
 }
 
 /* Cart Item Cards */
@@ -313,10 +339,6 @@ td .order-action-button {
     width: 65px;
     padding: 8px;
     box-sizing: border-box;
-}
-
-.cart-item-card a {
-    color: #0A0B15;
 }
 
 /* Cart Add-On Card */
@@ -385,7 +407,7 @@ td .order-action-button {
 }
 
 /* Order history buttons */
-.view-invoice-button, 
+.view-invoice-button,
 .order-action-button {
     font-family: Consolas, monospace;
     font-size: 14px;
@@ -400,7 +422,7 @@ td .order-action-button {
     text-align: center;
 }
 
-.view-invoice-button:hover, 
+.view-invoice-button:hover,
 .order-action-button:hover {
     background-color: #6E4021;
     color: #FFFFFF;
@@ -513,11 +535,8 @@ footer {
     background-color: #CC9F69;
 }
 
+/* @media queries for small screens. */
 @media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-
     header {
         text-align: center;
     }
@@ -569,34 +588,4 @@ footer {
     .invoice-total {
         font-size: 18px;
     }
-}
-
-@media (max-width: 900px) {
-    .donut-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Full-width homepage hero */
-main:has(.hero) {
-    max-width: none;
-    margin: 0;
-    padding: 0;
-}
-
-.hero {
-    width: 100%;
-    min-height: 450px;
-    box-sizing: border-box;
-    background-image: url("../images/donut-header.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 30px;
-    margin: 0;
-    border-radius: 0;
 }
