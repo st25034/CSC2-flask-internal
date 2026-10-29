@@ -3,8 +3,9 @@
 {% block title %}Menu - Donuttery{% endblock %}
 
 {% block content %}
-<h2>Our Donuts</h2>
+            <h2>Our Donuts</h2>
 
+<!-- Display flash messages after customer actions. -->
 {% with messages = get_flashed_messages() %}
     {% if messages %}
         <ul class="flashes">
@@ -13,7 +14,9 @@
             {% endfor %}
         </ul>
     {% endif %}
+{% endwith %}
 
+<!-- Displaying each donut with its corresponding price. -->
 <div class="donut-grid">
     {% for donut, details in donuts.items() %}
         <div class="donut-card">
@@ -25,29 +28,32 @@
 
             <form action="{{ url_for('add_to_cart') }}" method="post">
                 <input type="hidden" name="donut" value="{{ donut }}">
-  
-            {% if details['stock'] > 0 %}
-                <label for="quantity-{{ loop.index }}">Quantity:</label>
-                <input type="number"
-                    name="quantity"
-                    id="quantity-{{ loop.index }}"
-                    value="1"
-                    min="1"
-                    max="{{ details['stock'] }}">
 
-                <button type="submit">Add to Cart</button>
-            {% else %}
-                <p>Out of stock</p>
-                <label for="quantity-{{ loop.index }}">Quantity:</label>
-                <input type="number"
-                    id="quantity-{{ loop.index }}"
-                    value="0"
-                    disabled>
+                <!-- Shows quantity controls when the donut is in stock. -->
+                {% if details['stock'] > 0 %}
+                    <label for="quantity-{{ loop.index }}">Quantity:</label>
+                    <input type="number"
+                        name="quantity"
+                        id="quantity-{{ loop.index }}"
+                        value="1"
+                        min="1"
+                        max="{{ details['stock'] }}"
+                        required>
 
-                <button type="button" disabled>Out of Stock</button>
-            {% endif %}
-            
-            </form>
+                    <button type="submit" class="zoom-button">Add to Cart</button>
+
+                <!-- Disable ordering controls if  donut is unavailable. -->
+                {% else %}
+                    <p>Out of stock</p>
+                    <label for="quantity-{{ loop.index }}">Quantity:</label>
+                    <input type="number"
+                        id="quantity-{{ loop.index }}"
+                        value="0"
+                        disabled>
+
+                    <button type="button" disabled>Out of Stock</button>
+                {% endif %}
+                </form>
         </div>
     {% endfor %}
 </div>
@@ -61,8 +67,7 @@
                 {{ addon }} (${{ data.price }})
             </label><br>
         {% endfor %}
-        <button type="submit">Add to Cart</button>
+        <button type="submit" class="zoom-button">Add to Cart</button>
     </fieldset>
 </form>
-{% endwith %}
 {% endblock %}
