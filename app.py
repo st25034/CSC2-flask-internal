@@ -1,27 +1,52 @@
+"""Run the Donuttery application."""
 import datetime
 import sqlite3
 import json
-from flask import Flask, render_template, request, redirect, url_for, session, flash
 
+from flask import (
+    Flask, render_template, request, redirect, url_for,
+    session, flash
+)
+
+DISCOUNT_THRESHOLD = 70
+DISCOUNT_RATE = 0.10
+DISCOUNT_MESSAGE_THRESHOLD = 50
+
+# Create the Flask application.
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+
 # Calculate total cost based on cart contents and selected addons
 def calculate_total(cart, selected_addons):
-    donut_subtotal = sum(item['price'] * item['quantity'] for item in cart.values())
+    """
+    Calculate cart subtotals, the total cost and discount status.
+
+    Args: cart information + selected add-ons
+
+    Returns: total cost, donut subtotal, add-on subtotal, and discount status
+    """
+    # Calculate the cost of donuts and selected add-ons separately.
+    donut_subtotal = sum(
+        item['price'] * item['quantity']
+        for item in cart.values()
+    )
     addon_subtotal = sum(selected_addons.values())
 
     total = donut_subtotal + addon_subtotal
 
     discount_applied = False
 
-    if total > 70:
-        total = total * 0.90
+   # Apply 10% discount when the subtotal is greater than $70.
+    if total > DISCOUNT_THRESHOLD:
+        total = total * (1 - DISCOUNT_RATE)
         discount_applied = True
 
     return total, donut_subtotal, addon_subtotal, discount_applied
 
+
 def initialise_database():
+    """Create the orders table if it does not already exist."""
     with sqlite3.connect('donut_shop.db') as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -35,43 +60,69 @@ def initialise_database():
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-    
+
+
 @app.route('/')
 def index():
+    """Display the website's home page."""
     return render_template('index.html')
 
 
 @app.route('/menu')
 def menu():
+    """Display the menu and current cart totals."""
     donuts, addons = load_data()
     cart = session.get('cart', {})
     selected_addons = session.get('selected_addons', {})
-    total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(cart, selected_addons)
+    total, donut_subtotal, addon_subtotal, discount_applied = (
+        calculate_total(cart, selected_addons)
+    )
     subtotal = donut_subtotal + addon_subtotal
 
-    if subtotal > 70:
+    if subtotal > DISCOUNT_THRESHOLD:
         flash("Great news! You've unlocked 10% off your order!")
-    elif subtotal > 50:
-        flash("You're almost there! Spend over $70 to receive 10% off your order.")
+    elif subtotal > DISCOUNT_MESSAGE_THRESHOLD:
+        flash(
+            "You're almost there! Spend over $"
+            f"{DISCOUNT_THRESHOLD} "
+            "to receive 10% off your order."
+        )
 
-    return render_template('menu.html', donuts=donuts, addons=addons, cart=cart, selected_addons=selected_addons, donut_subtotal=donut_subtotal, addon_subtotal=addon_subtotal, total=total, discount_applied=discount_applied)
+    return render_template(
+        'menu.html',
+        donuts=donuts,
+        addons=addons,
+        cart=cart,
+        selected_addons=selected_addons,
+        donut_subtotal=donut_subtotal,
+        addon_subtotal=addon_subtotal,
+        total=total,
+        discount_applied=discount_applied
+    )
+
 
 @app.route('/about')
 def about():
+    """Display information about the donut shop."""
     return render_template('about.html')
+
 
 @app.route('/invoices')
 def invoices():
+    """Display the invoice page."""
     return render_template('invoices.html')
+
 
 # Order history page show past orders from the database
 @app.route('/orders')
 def order_history():
+    """Retrieve saved orders and display them by date."""
     with sqlite3.connect('donut_shop.db') as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM orders ORDER BY date DESC")
         rows = cursor.fetchall()
 
+    # Convert database rows into dictionaries for the HTML template.
     orders = []
 
     for row in rows:
@@ -87,9 +138,16 @@ def order_history():
 
     return render_template('order_history.html', orders=orders)
 
+
 # View a customer's saved invoice
 @app.route('/view_invoice/<int:order_id>')
 def view_invoice(order_id):
+    """
+    Retrieve and display a saved invoice by order ID.
+
+    Args:
+        order_id: ID of the order to retrieve.
+    """
     with sqlite3.connect('donut_shop.db') as conn:
         cursor = conn.cursor()
         cursor.execute(
@@ -134,9 +192,16 @@ def view_invoice(order_id):
         discount=discount
     )
 
+
 # Delete an order from the database by ID
 @app.route('/cancel_saved_order/<int:order_id>', methods=['POST'])
 def cancel_saved_order(order_id):
+    """
+    Delete a saved order from the database.
+
+    Args:
+        order_id: ID of the order to delete.
+    """
     with sqlite3.connect('donut_shop.db') as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM orders WHERE order_id = ?", (order_id,))
@@ -145,7 +210,14 @@ def cancel_saved_order(order_id):
     flash("Order cancelled")
     return redirect(url_for('order_history'))
 
+
 def load_data():
+    """
+    Load donut and add-on information from JSON files.
+
+    Returns:
+        Dictionaries containing donut and add-on data.
+    """
     try:
         with open('data/donuts.json') as file:
             donuts = json.load(file)
@@ -153,15 +225,23 @@ def load_data():
         with open('data/addons.json') as file:
             addons = json.load(file)
 
-        return donuts, addons 
+        return donuts, addons
+    # Handle missing or incorrectly formatted JSON files.
     except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Error loading data: {e}")
         return {}, {}
 
+
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
-    donut = request.form['donut']
-    quantity = int(request.form['quantity'])
+    """Add a selected donut to the cart after checking stock."""
+    donut = request.form.get('donut')
+    quantity = request.form.get('quantity', type=int)
+
+    if quantity is None or quantity < 1:
+        flash("Please enter a valid quantity of at least 1.")
+        return redirect(url_for('menu'))
+
     donuts, addons = load_data()
     cart = session.get('cart', {})
 
@@ -175,7 +255,10 @@ def add_to_cart():
         new_quantity = quantity
 
     if new_quantity > donuts[donut]['stock']:
-        flash(f"Not enough {donut} in stock. Only {donuts[donut]['stock']} available.")
+        flash(
+            f"Not enough {donut} in stock. "
+            f"Only {donuts[donut]['stock']} available."
+        )
         return redirect(url_for('menu'))
 
     if donut in cart:
@@ -186,29 +269,39 @@ def add_to_cart():
             'quantity': quantity
         }
 
+    # Save the updated cart in the session.
     session['cart'] = cart
     session.modified = True
     flash(f"{quantity} {donut}(s) added to cart.")
     return redirect(url_for('menu'))
 
+
 # Remove an item from the shopping cart
 @app.route('/remove_from_cart/<item>')
 def remove_from_cart(item):
+    """
+    Remove a donut from the cart.
+
+    Args:
+        item: Name of the donut to remove.
+    """
     cart = session.get('cart', {})
 
     if item in cart:
-        del cart [item]
-        session ['cart'] = cart
+        del cart[item]
+        session['cart'] = cart
         session.modified = True
         flash(f"Removed all {item} from the cart.")
     else:
         flash("Item not found in cart")
-        
+
     return redirect(url_for('cart'))
+
 
 # Update the quantity of a donut in the shopping cart
 @app.route('/update_quantity', methods=['POST'])
 def update_quantity():
+    """Update a cart item's quantity after validating it."""
     donut = request.form.get('donut')
     quantity = request.form.get('quantity', type=int)
 
@@ -224,7 +317,10 @@ def update_quantity():
         return redirect(url_for('cart'))
 
     if quantity > donuts[donut]['stock']:
-        flash(f"Sorry, only {donuts[donut]['stock']} {donut}(s) are available.")
+        flash(
+            f"Sorry, only {donuts[donut]['stock']} "
+            f"{donut}(s) are available."
+        )
         return redirect(url_for('cart'))
 
     cart[donut]['quantity'] = quantity
@@ -234,11 +330,13 @@ def update_quantity():
     flash(f"Updated {donut} quantity.")
     return redirect(url_for('cart'))
 
+
 # Add selected addons to the session
 @app.route('/select_addon', methods=['POST'])
 def select_addon():
+    """Save selected add-ons and their prices in the session."""
     selected_addons = session.get('selected_addons', {})
-    _, addons = load_data() # we only need addons
+    _, addons = load_data()
 
     selected_keys = request.form.getlist('addons')
 
@@ -257,9 +355,16 @@ def select_addon():
 
     return redirect(url_for('menu'))
 
+
 # Remove an add-on from the shopping cart
 @app.route('/remove_addon/<addon>')
 def remove_addon(addon):
+    """
+    Remove a selected add-on from the cart.
+
+    Args:
+        addon: Name of the add-on to remove.
+    """
     selected_addons = session.get('selected_addons', {})
 
     if addon in selected_addons:
@@ -272,19 +377,23 @@ def remove_addon(addon):
 
     return redirect(url_for('cart'))
 
+
 # Clear cart and addons from the session (cancel current order)
 @app.route('/cancel_order', methods=['POST'])
 def cancel_order():
+    """Clear the cart and selected add-ons from the session."""
     session.pop('cart', None)
     session.pop('selected_addons', None)
     session.modified = True
 
-    flash("Order Cancelled. Your cart has been emptied.")
+    flash("Your cart has been cleared.")
 
     return redirect(url_for('cart'))
 
+
 @app.route('/cart')
 def cart():
+    """Display cart items, subtotals and discount information."""
     cart = session.get('cart', {})
     selected_addons = session.get('selected_addons', {})
 
@@ -294,10 +403,13 @@ def cart():
 
     subtotal = donut_subtotal + addon_subtotal
 
-    if subtotal > 70:
+    if subtotal > DISCOUNT_THRESHOLD:
         flash("Great news! You've unlocked 10% off your order!")
-    elif subtotal > 50:
-        flash("You're almost there! Spend over $70 to receive 10% off your order.")
+    elif subtotal > DISCOUNT_MESSAGE_THRESHOLD:
+        flash(
+            f"You're almost there! Spend over ${DISCOUNT_THRESHOLD} "
+            "to receive 10% off your order."
+        )
 
     return render_template(
         'cart.html',
@@ -309,53 +421,77 @@ def cart():
         discount_applied=discount_applied
     )
 
-#Check out current order
+
+# Check out current order
 @app.route('/checkout', methods=['POST'])
 def checkout():
-
-    #Validate customer name
+    """Validate the order, save it and generate an invoice."""
+    # Validate customer name
     customer_name = request.form['customer_name'].strip().title()
-    # Check if the customer name has been entered, if not, display message
-    # and return to home page (index.html)
+
+    # Check if the customer name has been entered
     if not customer_name:
         flash("Customer name is required.")
-        return redirect(url_for('menu'))
+        return redirect(url_for('cart'))
+
+    # Check if the customer name contains only letters and spaces
+    if not all(char.isalpha() or char.isspace() for char in customer_name):
+        flash("Please enter a valid customer name. Use letters only.")
+        return redirect(url_for('cart'))
 
     # Get selected donuts (cart) and selected addons from the session
     cart = session.get('cart', {})
     selected_addons = session.get('selected_addons', {})
-    
+
     # Prevent checkout with an empty cart
     if not cart:
         flash("Your cart is empty.")
-        return redirect(url_for('menu'))
+        return redirect(url_for('cart'))
 
     # Calculate total
-    total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(cart, selected_addons)
+    total, donut_subtotal, addon_subtotal, discount_applied = calculate_total(
+        cart, selected_addons
+    )
 
     subtotal = donut_subtotal + addon_subtotal
     discount = subtotal - total
 
     # Create invoice number and date
     invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    invoice_number = f"INV_{customer_name.replace(' ', '_')}_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
-    
-    #Save order to SQLite database
+    invoice_number = (
+        f"INV_{customer_name.replace(' ', '_')}_"
+        f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    )
+
+    # Save order to SQLite database
     try:
         with sqlite3.connect('donut_shop.db') as conn:
             cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO orders (invoice_number, customer_name, items, addons, total)
+            cursor.execute(
+                '''
+                INSERT INTO orders (
+                    invoice_number, customer_name, items,
+                    addons, total
+                )
                 VALUES (?, ?, ?, ?, ?)
-            ''', (invoice_number, customer_name, json.dumps(cart), json.dumps(selected_addons), total))
+                ''',
+                (
+                    invoice_number,
+                    customer_name,
+                    json.dumps(cart),
+                    json.dumps(selected_addons),
+                    total
+                )
+            )
             conn.commit()
 
     except sqlite3.Error as e:
         flash("Database error occurred.")
         print(f"SQLite error: {e}")
+        return redirect(url_for('cart'))
 
     # Update the stock in donuts.json
-    try: 
+    try:
         with open('data/donuts.json', 'r') as file:
             donut_data = json.load(file)
 
@@ -368,7 +504,7 @@ def checkout():
 
         with open('data/donuts.json', 'w') as file:
             json.dump(donut_data, file, indent=4)
-    
+
     except OSError as e:
         flash("Could not update stock file.")
         print(f"Error updating stock: {e}")
@@ -380,11 +516,18 @@ def checkout():
             f.write("DONUT SHOP INVOICE\n")
             f.write(f"Invoice Number: {invoice_number}\n")
             f.write(f"Customer Name: {customer_name}\n")
-            f.write(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+            f.write(
+                "Date: "
+                f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            )
 
             f.write("Items:\n")
             for item, details in cart.items():
-                f.write(f"- {item}: {details['quantity']} x ${details['price']} = ${details['quantity'] * details['price']:.2f}\n")
+                f.write(
+                    f"- {item}: {details['quantity']} "
+                    f"x ${details['price']} = "
+                    f"${details['quantity'] * details['price']:.2f}\n"
+                )
 
             f.write("\nAdd-Ons:\n")
             for addon, price in selected_addons.items():
@@ -423,6 +566,8 @@ def checkout():
         discount=discount
     )
 
+
+# Initialise the database and start the development server.
 if __name__ == '__main__':
     initialise_database()
     app.run(debug=True)
