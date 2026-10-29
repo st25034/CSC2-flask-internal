@@ -1,40 +1,45 @@
-    <!DOCTYPE html>
-    <html lang="en">
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title>{% block title %}Donuttery{% endblock %}</title>
 
+        <!-- Embedded Google Fonts. -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
+        <!-- Linking CSS file. -->
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
     <body>
+        <!-- Website header and navigation bar. -->
         <header>
-             <div class="nav-container">
+            <div class="nav-container">
                 <h1>Donuttery</h1>
                 
+                <!-- Link the logo to the home page. -->
                 <a href="{{ url_for('index') }}" class="logo-link">
                     <img src="{{ url_for('static', filename='images/donut_logo.png') }}"
                         alt="Donuttery logo"
                         class="logo">
                 </a>
 
+                <!-- Navigation links for main website pages. -->
                 <nav>
                     <a href="{{ url_for('index') }}">Home</a>
                     <a href="{{ url_for('menu') }}">Menu</a>
                     <a href="{{ url_for('order_history') }}">Order History</a>
                     <a href="{{ url_for('cart') }}">Cart</a>
->
                 </nav>
-
-             </div>
+            </div>
         </header>
         <main>
             {% block content %}{% endblock %}
         </main>
+
+        <!-- Website footer. -->
         <footer>
             <p>&copy; 2026 Donut Shop</p>
         </footer>
     </body>
-    </html>
+</html>

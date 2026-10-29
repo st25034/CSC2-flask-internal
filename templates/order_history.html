@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Order History - Donut Shop{% endblock %}
+{% block title %}Order History - Donuttery{% endblock %}
 
 {% block content %}
     <h2>Order History</h2>
 
+    <!-- Display flash messages after customer actions. -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <ul class="flashes">
@@ -15,6 +16,7 @@
         {% endif %}
     {% endwith %}
 
+    <!-- Display the order history table when saved orders exist. -->
     {% if orders %}
         <table>
             <thead>
@@ -28,7 +30,7 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            
+            <!-- Display saved order & its details in a separate row. -->
             <tbody>
                 {% for order in orders %}
                     <tr>
@@ -63,9 +65,10 @@
                         
                         <td>{{ order['date'] }}</td>
 
+                        <!-- Allow users to cancel an order or view its invoice. -->
                         <td>
                             <form action="{{ url_for('cancel_saved_order', order_id=order.order_id) }}" method="post"
-                                onsubmit="return confirm('Cancel this order?')">
+                                onsubmit="return confirm('Are you sure you want to cancel your order?')">
                                 <button type="submit" class="order-action-button">Cancel</button>
                             </form>
 

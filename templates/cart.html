@@ -1,108 +1,117 @@
 {% extends "base.html" %}
 
 {% block title %}Your Cart - Donuttery{% endblock %}
-
 {% block content %}
     <h2>Your Shopping Cart</h2>
 
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <ul class="flashes">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
+    <!-- Display flash messages after customer actions. -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 
-{% if cart %}
-    <div class="cart-items">
-        {% for item, details in cart.items() %}
-            <div class="cart-item-card">
-                <strong>{{ item }}</strong>
+    <!-- Display cart items when the cart contains donuts. -->
+    {% if cart %}
+        <div class="cart-items">
+            {% for item, details in cart.items() %}
+                <div class="cart-item-card">
+                    <strong>{{ item }}</strong>
 
-                <p>${{ '%.2f' % details['price'] }} each</p>
+                    <p>${{ '%.2f' % details['price'] }} each</p>
 
-                <form action="{{ url_for('update_quantity') }}"
-                      method="post"
-                      class="cart-quantity-form">
+                    <!-- Allow customers to update the donut quantity. -->
+                    <form action="{{ url_for('update_quantity') }}"
+                        method="post"
+                        class="cart-quantity-form">
 
-                    <input type="hidden" name="donut" value="{{ item }}">
+                        <input type="hidden" name="donut" value="{{ item }}">
 
-                    <label for="quantity-{{ loop.index }}">Quantity:</label>
-                    <input
-                        type="number"
-                        name="quantity"
-                        id="quantity-{{ loop.index }}"
-                        value="{{ details['quantity'] }}"
-                        min="1"
-                        required
-                    >
+                        <label for="quantity-{{ loop.index }}">Quantity:</label>
+                        <input
+                            type="number"
+                            name="quantity"
+                            id="quantity-{{ loop.index }}"
+                            value="{{ details['quantity'] }}"
+                            min="1"
+                            required
+                        >
 
-                    <button type="submit">Update</button>
-                </form>
+                        <button type="submit" class="zoom-button">Update</button>
+                    </form>
 
-                <p>
-                    Item subtotal:
-                    ${{ '%.2f' % (details['quantity'] * details['price']) }}
-                </p>
-
-                <a href="{{ url_for('remove_from_cart', item=item) }}">Remove</a>
-            </div>
-        {% endfor %}
-    </div>
-
-    <h4>Donuts subtotal: ${{ '%.2f' % donut_subtotal }}</h4>
-
-{% else %}
-    <p>Your cart is empty.</p>
-{% endif %}
-
-<h3>Selected Add-ons</h3>
-
-{% if selected_addons %}
-    <div class="cart-addon-card">
-        <h3>Selected Add-Ons</h3>
-
-        <div class="cart-addon-list">
-            {% for addon, price in selected_addons.items() %}
-                <div class="cart-addon-item">
+                    <!-- Calculate and display the subtotal for this donut. -->
                     <p>
-                        <strong>{{ addon }}</strong> - ${{ '%.2f' % price }}
+                        Item subtotal:
+                        ${{ '%.2f' % (details['quantity'] * details['price']) }}
                     </p>
 
-                    <a href="{{ url_for('remove_addon', addon=addon) }}">
-                        Remove
-                    </a>
+                    <!-- Allow customers to remove a donut from the cart. -->
+                    <a href="{{ url_for('remove_from_cart', item=item) }}">Remove</a>
                 </div>
             {% endfor %}
         </div>
-    </div>
-{% endif %}
 
+        <h4>Donuts subtotal: ${{ '%.2f' % donut_subtotal }}</h4>
 
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
 
-{% if discount_applied %}
-    <h4>Discount (10%): -${{ '%.2f' % ((donut_subtotal + addon_subtotal) - total) }}</h4>
-{% endif %}
+    <!-- Display selected add-ons when any have been chosen. -->
+    <h3>Selected Add-ons</h3>
+    {% if selected_addons %}
+        <div class="cart-addon-card">
+            <h3>Selected Add-Ons</h3>
 
-<h4>Total: ${{ '%.2f' % total }}</h4>
+            <div class="cart-addon-list">
+                {% for addon, price in selected_addons.items() %}
+                    <div class="cart-addon-item">
+                        <p>
+                            <strong>{{ addon }}</strong> - ${{ '%.2f' % price }}
+                        </p>
 
-<form action="{{ url_for('checkout') }}" method="post">
-    <label for="customer_name_checkout">Your Name:</label>
-    <input type="text" name="customer_name" id="customer_name_checkout" required>
+                        <!-- Allow customers to remove a selected add-on. -->
+                        <a href="{{ url_for('remove_addon', addon=addon) }}">
+                            Remove
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 
-    <button type="submit">Checkout</button>
+    <!-- Display the discount if an order qualifies for it. -->
+    {% if discount_applied %}
+        <h4>Discount (10%): -${{ '%.2f' % ((donut_subtotal + addon_subtotal) - total) }}</h4>
+    {% endif %}
 
-    <button type="submit"
-            formaction="{{ url_for('cancel_order') }}"
-            onclick="return confirm('Are you sure you want to cancel your order?')">
-        Cancel Order
-    </button>
-</form>
+    <!-- Display the final order total. -->
+    <h4>Total: ${{ '%.2f' % total }}</h4>
 
-<a href="{{ url_for('menu') }}" class="back-button">
-    ← Continue Shopping
-</a>
+    <!-- Checkout form -->
+    <form action="{{ url_for('checkout') }}" method="post">
+        <label for="customer_name_checkout">Your Name:</label>
+        <input type="text" name="customer_name" id="customer_name_checkout" required>
+
+        <button type="submit" class="zoom-button">Checkout</button>
+    </form>
+
+    <!-- Clear cart form -->
+    <form action="{{ url_for('cancel_order') }}" method="post">
+        <button type="submit"
+                onclick="return confirm('Are you sure you want to clear your cart?')"
+                class="zoom-button">
+            Clear Cart
+        </button>
+    </form>
+
+    <a href="{{ url_for('menu') }}" class="back-button">
+        ← Continue Shopping
+    </a>
 
 {% endblock %}

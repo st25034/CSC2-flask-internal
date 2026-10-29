@@ -8,12 +8,14 @@
 
     <p class="invoice-thank-you">Thank you for your order!</p>
 
+    <!-- Display the customer's details and invoice information. -->
     <div class="invoice-details">
         <p><strong>Invoice Number:</strong> {{ invoice_number }}</p>
         <p><strong>Customer Name:</strong> {{ customer_name }}</p>
         <p><strong>Date:</strong> {{ invoice_date }}</p>
     </div>
 
+    <!-- Display the donuts included in the order. -->
     <div class="invoice-section">
         <h3>Items</h3>
 
@@ -31,6 +33,7 @@
         {% endif %}
     </div>
 
+    <!-- Display any add-ons included in the order. -->
     <div class="invoice-section">
         <h3>Add-Ons</h3>
 
@@ -63,12 +66,14 @@
             </p>
         {% endif %}
 
+        <!-- Display the final total the customer needs to pay. -->
         <p class="invoice-total">
             <span>Total:</span>
             <strong>${{ '%.2f' % total }}</strong>
         </p>
     </div>
 
+    <!-- Allow the customer to return to the home page. -->
     <a href="{{ url_for('index') }}" class="back-button">← Back to home</a>
 </div>
 {% endblock %}
